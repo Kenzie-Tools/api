@@ -9,20 +9,22 @@ import type {
     UserContextMenuCommandInteraction,
 } from "discord.js";
 
+export type ChatInput = {
+	role: "CHAT_INPUT";
+	run: (interaction: ChatInputCommandInteraction) => unknown;
+	name: string;
+	name_localizations?: Record<string, string>;
+	description: string;
+	description_localizations?: Record<string, string>;
+	options?: ApplicationCommandOption[];
+	default_member_permissions?: string;
+	nsfw?: boolean;
+	integration_types?: number[];
+	contexts?: number[];
+}
+
 export type Command =
-    | {
-          role: "CHAT_INPUT";
-          run: (interaction: ChatInputCommandInteraction) => unknown;
-          name: string;
-          name_localizations?: Record<string, string>;
-          description: string;
-          description_localizations?: Record<string, string>;
-          options?: ApplicationCommandOption[];
-          default_member_permissions?: string;
-          nsfw?: boolean;
-          integration_types?: number[];
-          contexts?: number[];
-      }
+    | ChatInput
     | {
           role: "MESSAGE_CONTEXT_MENU";
           run: (interaction: MessageContextMenuCommandInteraction) => unknown;
@@ -71,3 +73,8 @@ export type Command =
       };
 
 export type CommandNoRun = Omit<Command, "run">;
+
+export type CommandAddon = {
+	option: ApplicationCommandOption;
+	run: (interaction: ChatInputCommandInteraction) => unknown;
+}
