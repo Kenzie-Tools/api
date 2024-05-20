@@ -5,15 +5,7 @@ export default {
     name: "scpsl",
     role: "CHAT_INPUT",
     description: "Run commands based off of SCP:SL",
-    options: [
-        {
-            type: 3,
-            name: "command",
-            description: "The command you need help with",
-            required: false,
-            autocomplete: true,
-        },
-    ],
+    options: [],
     run: async (interaction) => {
         const button = new ButtonBuilder()
             .setCustomId("blah")

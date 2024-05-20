@@ -1,11 +1,12 @@
 import { Hono } from "hono";
-import { ApplicationCommand, ApplicationCommandOption, Client, REST, Routes } from "discord.js";
+import { ApplicationCommand, Client, REST, Routes } from "discord.js";
 import { readdirSync } from "fs";
 import path from "path";
-import { ChatInput, Command, CommandAddon } from "../types/discord";
+import { ChatInput, CommandAddon } from "../types/discord";
 
 export default async function (app: Hono, client: Client) {
     app.post("/register-command/:id", async (c) => {
+        console.log('interaction')
         const { id } = c.req.param();
 
         const { command, game } = await c.req.json() as { command: string; game: string }
@@ -30,6 +31,7 @@ export default async function (app: Hono, client: Client) {
             c.status(404);
             return c.json({ error: "Command not found" });
         }
+        
         const cmd = (await import(path.join(process.cwd(), `/src/interactions/${game}/${command}`))).default as CommandAddon;
         const indexCmd = (await import(path.join(process.cwd(), `/src/interactions/${game}/index`))).default as ChatInput;
 
@@ -39,21 +41,18 @@ export default async function (app: Hono, client: Client) {
             Routes.applicationGuildCommands(process.env.CLIENT_ID as string, id)
         ) as ApplicationCommand[]).find((cmd) => cmd.name === game);
 
-        if(!oldCommand) {
-            await rest.post(
-                Routes.applicationGuildCommands(process.env.CLIENT_ID as string, id),
-                { body: JSON.parse(JSON.stringify(indexCmd)) }
-            )
-            oldCommand = (await rest.get(
-                Routes.applicationGuildCommands(process.env.CLIENT_ID as string, id)
-            ) as ApplicationCommand[]).find((cmd) => cmd.name === game) as ApplicationCommand;
-        }
+        indexCmd.options = [...oldCommand?.options || [], cmd.option];
 
-        oldCommand.options = [...oldCommand?.options, cmd.option];
+        const body = {
+            name: indexCmd.name,
+            description: indexCmd.description,
+            options: indexCmd.options,
+            type: 2
+        }
 
         await rest.post(
             Routes.applicationGuildCommands(process.env.CLIENT_ID as string, id),
-            { body: commandBody}
-        );
+            { body: [body] }
+        ).catch((err) => console.log(err.requestBody));
     });
 }

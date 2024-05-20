@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { Command } from "./types/discord";
 import path from "path";
 import checkServer from './routes/check-server';
+import registerCommand from './routes/register-command';
 dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -47,6 +48,7 @@ app.get('/', (c) => {
 })
 
 checkServer(app, client)
+registerCommand(app, client)
 
 const port = 3000
 console.log(`Server is running on port ${port}`)
