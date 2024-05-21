@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import fs, { readdirSync } from 'fs'
+import { readdirSync } from 'fs'
 import { Client, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
 import { Command } from "./types/discord";
@@ -13,12 +13,12 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 export const commands = new Map<string, Command>();
 
-const eventFolders = readdirSync(path.join(process.cwd(), "/src/events"));
+const eventFolders = readdirSync('src/events');
 for (const folder of eventFolders) {
     switch (folder) {
         case "discord": {
             readdirSync(
-                path.join(process.cwd(), `/src/events/${folder}`),
+                'src/events/discord',
             ).forEach((file) => {
                 import(`./events/${folder}/${file}`).then((event) => {
                     event.default(client);
@@ -28,7 +28,7 @@ for (const folder of eventFolders) {
         }
         default: {
             readdirSync(
-                path.join(process.cwd(), `/src/events/${folder}`),
+                `src/events/${folder}`,
             ).forEach((file) => {
                 import(`./events/${folder}/${file}`).then((event) => {
                     event.default();

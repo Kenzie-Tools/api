@@ -6,7 +6,6 @@ import { ChatInput, CommandAddon } from "../types/discord";
 
 export default async function (app: Hono, client: Client) {
     app.post("/register-command/:id", async (c) => {
-        console.log('interaction')
         const { id } = c.req.param();
 
         const { command, game } = await c.req.json() as { command: string; game: string }
@@ -18,7 +17,7 @@ export default async function (app: Hono, client: Client) {
             return c.json({ error: "Guild not found" });
         }
 
-        const commandsFolder = readdirSync(path.join(process.cwd(), `/src/interactions/${game}`)).filter((file) => file.endsWith(".ts"));
+        const commandsFolder = readdirSync(`src/interactions/${game}`).filter((file) => file.endsWith(".ts"));
 
         if(!commandsFolder || commandsFolder.length === 0) {
             c.status(404);
@@ -32,8 +31,8 @@ export default async function (app: Hono, client: Client) {
             return c.json({ error: "Command not found" });
         }
         
-        const cmd = (await import(path.join(process.cwd(), `/src/interactions/${game}/${command}`))).default as CommandAddon;
-        const indexCmd = (await import(path.join(process.cwd(), `/src/interactions/${game}/index`))).default as ChatInput;
+        const cmd = (await import(`../interactions/${game}/${command}`)).default as CommandAddon;
+        const indexCmd = (await import(`../interactions/${game}/index`)).default as ChatInput;
 
         const rest = new REST({ version: "10" }).setToken(process.env.TOKEN as string);
 
@@ -46,13 +45,15 @@ export default async function (app: Hono, client: Client) {
         const body = {
             name: indexCmd.name,
             description: indexCmd.description,
-            options: indexCmd.options,
-            type: 2
+            options: indexCmd.options
         }
 
         await rest.post(
             Routes.applicationGuildCommands(process.env.CLIENT_ID as string, id),
-            { body: [body] }
-        ).catch((err) => console.log(err.requestBody));
+            { body: body }
+        ).catch((err) => {
+            console.log(err)
+            console.log(err.requestBody)
+        });
     });
 }

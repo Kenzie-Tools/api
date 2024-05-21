@@ -7,16 +7,13 @@ import { Command, CommandNoRun } from "../../types/discord";
 export default async function (client: Client) {
     client.on("ready", async () => {
         const commandFolders = readdirSync(
-            path.join(process.cwd(), "/src/interactions"),
+            'src/interactions',
         );
         const loadedCommands: CommandNoRun[] = [];
         for (const folder of commandFolders) {
                 const command = (
                     await import(
-                        path.join(
-                            process.cwd(),
-                            `/src/interactions/${folder}/index`,
-                        )
+                            `../../interactions/${folder}/index`,
                     )
                 ).default as Command & { type?: number };
                 if (

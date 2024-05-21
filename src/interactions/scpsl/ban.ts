@@ -1,4 +1,5 @@
 import { APIApplicationCommandInteractionDataSubcommandOption, ApplicationCommandOption } from "discord.js"
+import { CommandAddon } from "../../types/discord"
 
 export default {
     option: {
@@ -13,7 +14,9 @@ export default {
                 required: true
             }
         ]
+    },
+    run: async (interaction) => {
+        const user = interaction.options.getString("user", true)
+        
     }
-} as {
-    option: ApplicationCommandOption
-}
+} satisfies CommandAddon
