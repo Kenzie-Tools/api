@@ -1,34 +1,33 @@
-import { Hono } from "hono";
 import { ApplicationCommand, Client, REST, Routes } from "discord.js";
 import { readdirSync } from "fs";
-import path from "path";
 import { ChatInput, CommandAddon } from "../types/discord";
+import { Express } from "express";
 
-export default async function (app: Hono, client: Client) {
-    app.post("/register-command/:id", async (c) => {
-        const { id } = c.req.param();
+export default async function (app: Express, client: Client) {
+    app.post("/register-command/:id", async (req, res) => {
+        const { id } = req.params;
 
-        const { command, game } = await c.req.json() as { command: string; game: string }
+        const { command, game } = await req.body as { command: string; game: string }
 
         const guild = await client.guilds.fetch(id);
 
         if(!guild) {
-            c.status(404);
-            return c.json({ error: "Guild not found" });
+            res.status(404);
+            return res.json({ error: "Guild not found" });
         }
 
         const commandsFolder = readdirSync(`src/interactions/${game}`).filter((file) => file.endsWith(".ts"));
 
         if(!commandsFolder || commandsFolder.length === 0) {
-            c.status(404);
-            return c.json({ error: "No commands found" });
+            res.status(404);
+            return res.json({ error: "No commands found" });
         }
 
         const commandBody = commandsFolder.find((file) => file === `${command}.ts`);
 
         if(!commandBody) {
-            c.status(404);
-            return c.json({ error: "Command not found" });
+            res.status(404);
+            return res.json({ error: "Command not found" });
         }
         
         const cmd = (await import(`../interactions/${game}/${command}`)).default as CommandAddon;

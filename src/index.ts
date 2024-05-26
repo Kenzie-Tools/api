@@ -1,12 +1,11 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import express from 'express'
 import { readdirSync } from 'fs'
 import { Client, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
 import { Command } from "./types/discord";
-import path from "path";
 import checkServer from './routes/check-server';
 import registerCommand from './routes/register-command';
+import enableWs from 'express-ws'
 dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -41,19 +40,19 @@ for (const folder of eventFolders) {
 
 client.login(process.env.TOKEN);
 
-const app = new Hono()
+const app = express()
+enableWs(app)
 
-app.get('/', (c) => {
-  return c.redirect('https://kenzie.wtf')
+app.use(express.json())
+
+app.get('/', (req, res) => {
+  return res.redirect('https://kenzie.wtf')
 })
 
 checkServer(app, client)
 registerCommand(app, client)
 
-const port = 3000
+const port = process.env.PORT || 3000
 console.log(`Server is running on port ${port}`)
 
-serve({
-  fetch: app.fetch,
-  port
-})
+app.listen(port)

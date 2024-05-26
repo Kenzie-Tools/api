@@ -1,17 +1,17 @@
 import { Client } from "discord.js";
-import { Hono } from "hono";
+import { Express } from "express";
 
-export default async function (app: Hono, client: Client) {
-    app.get("/check-server/:id", async (c) => {
-        const { id } = c.req.param()
+export default async function (app: Express, client: Client) {
+    app.get("/check-server/:id", async (req, res) => {
+        const { id } = req.params
 
         const guild = await client.guilds.fetch(id)
 
         if (!guild) {
-            c.status(404)
-            return c.json({ error: "Guild not found" })
+            res.status(404)
+            return res.json({ error: "Guild not found" })
         }
 
-        return c.json({ success: true })
+        return res.json({ success: true })
     });
 }
